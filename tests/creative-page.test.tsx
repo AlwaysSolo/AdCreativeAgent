@@ -129,6 +129,7 @@ describe("CreativePage", () => {
             avoid: ["No logo"]
           }
         ],
+        savedCreativeAngleIds: ["01HX0000000000000000000002"],
         approvedConceptId: "concept-1",
         generatedPrompts: [
           {
@@ -148,6 +149,7 @@ describe("CreativePage", () => {
         `/review?runId=${run.runId}`
       );
       expect(screen.getAllByText("Firework Flag Sky").length).toBeGreaterThan(0);
+      expect(screen.getByText("Saved for later")).toBeInTheDocument();
       expect(screen.getByText("Hero visual")).toBeInTheDocument();
       expect(screen.getByText("Firework flag over a pool scene.")).toBeInTheDocument();
       expect(screen.getByText("Approved elements used")).toBeInTheDocument();

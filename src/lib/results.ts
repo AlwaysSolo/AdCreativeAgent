@@ -580,7 +580,7 @@ function findTargetAsset(run: RunState, assetId: string) {
 }
 
 export function campaignSlugFor(run: RunState) {
-  const value = run.brief?.campaignName ?? run.brief?.resortName ?? run.runId;
+  const value = run.creativeAngleSlug ?? run.brief?.campaignName ?? run.brief?.resortName ?? run.runId;
 
   return safeSegment(value);
 }

@@ -81,6 +81,16 @@ export const imageModelOptionsSchema = z.object({
   quality: z.enum(gptImage2QualityValues).optional()
 });
 
+export const modelSelectionStateSchema = z.object({
+  imageModelId: z.string().trim().min(1).optional(),
+  videoModelId: z.string().trim().min(1).optional(),
+  imageModel: modelInfoSchema.optional(),
+  videoModel: modelInfoSchema.optional(),
+  imageOptions: imageModelOptionsSchema.optional(),
+  generateVideo: z.boolean().optional(),
+  forceNoTextMode: z.boolean().optional()
+});
+
 export const promptAssignmentTargetSchema = z.object({
   channel: channelKeySchema,
   sizeNames: z.array(z.string().trim().min(1)).min(1)
@@ -122,6 +132,48 @@ export const creativeConceptSchema = z.object({
   avoid: z.array(z.string().trim().min(1)).optional()
 });
 
+export const creativeAngleStatusSchema = z.enum([
+  "draft",
+  "approved",
+  "generated",
+  "archived"
+]);
+
+export const selectedChannelSizesSchema = z.partialRecord(
+  channelKeySchema,
+  z.array(z.string().trim().min(1)).min(1)
+);
+
+export const creativeAngleRecordSchema = z.object({
+  angleId: z.string().trim().min(1),
+  projectId: z.string().trim().min(1),
+  projectName: z.string().trim().min(1).optional(),
+  projectSlug: z.string().trim().min(1).optional(),
+  destinationName: z.string().trim().min(1).optional(),
+  destinationSlug: z.string().trim().min(1),
+  sourceRunId: z.string().trim().min(1),
+  sourceConceptId: z.string().trim().min(1),
+  title: z.string().trim().min(1),
+  slug: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  heroVisual: z.string().trim().min(1).optional(),
+  adStructure: z.string().trim().min(1).optional(),
+  approvedElementsUsed: z.array(z.string().trim().min(1)).optional(),
+  avoid: z.array(z.string().trim().min(1)).optional(),
+  referenceImageUrls: z.array(referenceImageUrlSchema).optional(),
+  status: creativeAngleStatusSchema.default("draft"),
+  createdAt: z.string().datetime({ offset: true }),
+  updatedAt: z.string().datetime({ offset: true }),
+  defaultSelectedChannels: z.array(channelKeySchema).default([]),
+  defaultSelectedChannelSizes: selectedChannelSizesSchema.optional(),
+  defaultModelSelections: z.partialRecord(channelKeySchema, modelSelectionStateSchema).optional(),
+  defaultDryRun: z.boolean().optional(),
+  defaultEstimatedCostUsd: z.number().nonnegative().optional(),
+  defaultRequiresCostConfirm: z.boolean().optional(),
+  briefSnapshot: creativeBriefSchema.optional(),
+  generatedRunIds: z.array(z.string().trim().min(1)).default([])
+});
+
 export const creativeAdElementSchema = z.object({
   id: z.string().trim().min(1),
   label: z.string().trim().min(1),
@@ -146,6 +198,7 @@ export const creativeWorkspaceSchema = z.object({
   referenceImageUrls: z.array(referenceImageUrlSchema).optional(),
   messages: z.array(creativeChatMessageSchema).default([]),
   concepts: z.array(creativeConceptSchema).optional(),
+  savedCreativeAngleIds: z.array(z.string().trim().min(1)).optional(),
   approvedConceptId: z.string().trim().min(1).optional(),
   generatedPrompts: z.array(reviewedPromptSchema).optional()
 });
@@ -261,12 +314,15 @@ export type ChannelSelection = z.infer<typeof channelSelectionSchema>;
 export type ModelInfo = z.infer<typeof modelInfoSchema>;
 export type ModelSelection = z.infer<typeof modelSelectionSchema>;
 export type ImageModelOptions = z.infer<typeof imageModelOptionsSchema>;
+export type ModelSelectionStateShape = z.infer<typeof modelSelectionStateSchema>;
 export type ReferenceImageUrl = z.infer<typeof referenceImageUrlSchema>;
 export type PromptAssignmentTarget = z.infer<typeof promptAssignmentTargetSchema>;
 export type PromptAssignment = z.infer<typeof promptAssignmentSchema>;
 export type ReviewedPrompt = z.infer<typeof reviewedPromptSchema>;
 export type CreativeChatMessage = z.infer<typeof creativeChatMessageSchema>;
 export type CreativeConcept = z.infer<typeof creativeConceptSchema>;
+export type CreativeAngleStatus = z.infer<typeof creativeAngleStatusSchema>;
+export type CreativeAngleRecord = z.infer<typeof creativeAngleRecordSchema>;
 export type CreativeAdElement = z.infer<typeof creativeAdElementSchema>;
 export type CreativeWorkspace = z.infer<typeof creativeWorkspaceSchema>;
 export type RunRequest = z.infer<typeof runRequestSchema>;

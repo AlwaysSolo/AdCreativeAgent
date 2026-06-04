@@ -120,6 +120,8 @@ Step 2 pre-fills a short campaign name such as `July 4th`, `Memorial Day`, or `E
 
 Step 5 adds a chat-based Creative Direction workflow after model selection and before Review. The agent reads `src/generators/resort-ad-creative-prompt-agent.md`, asks for missing campaign/property details, proposes 2-3 creative angles, and waits for the user to approve one. Once approved, the app generates reviewed prompts for every selected channel size and carries them into Review.
 
+All generated creative angles are saved automatically under the current project and destination. Approving one angle for the current run does not discard the others. On the project page, the `Creative Angles` section groups saved angles by destination and lets you generate from any saved angle later. A new run created from a saved angle reuses the original channels, selected sizes, models, quality settings, brief, and Dry Run/live setting by default, then returns to Channel Selection so you can add or remove channels and sizes before continuing.
+
 If `OPENAI_API_KEY` is missing, the step still works with deterministic fallback questions, angles, and prompt prefixes so the UI can be tested without OpenAI spend.
 
 ## Prompt Assignments
@@ -150,6 +152,12 @@ Generated files are written under:
 
 ```text
 outputs/<project-slug>/<destination-slug>/<campaign-slug>/<runId>/
+```
+
+Runs generated from a saved creative angle use the angle slug in that position:
+
+```text
+outputs/<project-slug>/<destination-slug>/<creative-angle-slug>/<runId>/
 ```
 
 Older runs created before project or destination support may still appear at `outputs/<campaign-slug>/<runId>/` or `outputs/<project-slug>/<campaign-slug>/<runId>/`. Each new project run contains the resolved campaign data, prompts, cost log, raw files, drafts, final assets, OCR log, and a static `contact-sheet.html` archive. Final assets are grouped by channel:

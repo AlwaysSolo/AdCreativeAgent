@@ -10,6 +10,7 @@ import {
   reviewedPromptSchema,
   type ChannelKey,
   type CreativeBrief,
+  type CreativeAngleRecord,
   type CreativeWorkspace,
   type ImageModelOptions,
   type ModelInfo,
@@ -33,6 +34,9 @@ export type RunState = {
   landingPageUrl?: string;
   destinationName?: string;
   destinationSlug?: string;
+  creativeAngleId?: string;
+  creativeAngleTitle?: string;
+  creativeAngleSlug?: string;
   createdAt: string;
   updatedAt: string;
   scrapedBrief: ScrapedCreativeBrief;
@@ -256,6 +260,30 @@ export async function updateRunCreativeWorkspace(
   return updated;
 }
 
+export async function updateRunCreativeAngle(
+  runId: string,
+  angle: Pick<CreativeAngleRecord, "angleId" | "title" | "slug">,
+  options: RunStoreOptions = {}
+) {
+  const run = await readRun(runId, options);
+
+  if (!run) {
+    throw new Error(`Run not found: ${runId}`);
+  }
+
+  const updated: RunState = {
+    ...run,
+    updatedAt: (options.now?.() ?? new Date()).toISOString(),
+    creativeAngleId: angle.angleId,
+    creativeAngleTitle: angle.title,
+    creativeAngleSlug: angle.slug
+  };
+
+  await writeRun(updated, options);
+
+  return updated;
+}
+
 function validateSelectedChannelSizes(
   selectedChannels: ChannelKey[],
   selectedChannelSizes: SelectedChannelSizes | undefined
@@ -299,6 +327,10 @@ async function writeRun(run: RunState, options: RunStoreOptions) {
 
   await mkdir(cacheDir, { recursive: true });
   await writeFile(getRunPath(run.runId, options), JSON.stringify(run, null, 2));
+}
+
+export async function writeRunState(run: RunState, options: RunStoreOptions = {}) {
+  await writeRun(run, options);
 }
 
 function generateUlid(now: Date) {

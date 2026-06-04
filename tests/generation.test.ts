@@ -210,6 +210,57 @@ describe("generation orchestrator", () => {
     }
   });
 
+  it("writes angle-owned outputs under the project destination angle folder", async () => {
+    const outputRoot = await mkdtemp(path.join(os.tmpdir(), "generation-angle-output-"));
+    const run = {
+      ...readyRunState(),
+      projectId: "01HX0000000000000000000001",
+      projectName: "Westgate Summer Campaigns",
+      projectSlug: "westgate-summer-campaigns",
+      destinationName: "Orlando",
+      destinationSlug: "orlando",
+      creativeAngleId: "01HX0000000000000000000002",
+      creativeAngleTitle: "Fireworks Over Pool",
+      creativeAngleSlug: "fireworks-over-pool",
+      selectedChannels: ["meta" as const],
+      selectedChannelSizes: {
+        meta: ["Feed square"]
+      },
+      modelSelections: {
+        meta: {
+          imageModelId: imageModel.id,
+          imageModel
+        }
+      }
+    };
+
+    try {
+      await startGenerationRun(run.runId, {
+        outputRoot,
+        readRun: async () => run
+      });
+
+      await waitForGenerationRun(run.runId);
+
+      const runDir = path.join(
+        outputRoot,
+        "westgate-summer-campaigns",
+        "orlando",
+        "fireworks-over-pool",
+        run.runId
+      );
+      const costLog = await readFile(path.join(runDir, "cost-log.jsonl"), "utf8");
+      const finalAsset = await readFile(
+        path.join(runDir, "final", "meta", "meta_feed-square_1200x1200.png")
+      );
+
+      expect(costLog).toContain("meta_feed-square_1200x1200");
+      expect(finalAsset.length).toBeGreaterThan(0);
+    } finally {
+      await rm(outputRoot, { force: true, recursive: true });
+    }
+  });
+
   it("persists failed generation events so results can explain failed runs after refresh", async () => {
     const outputRoot = await mkdtemp(path.join(os.tmpdir(), "generation-failure-log-"));
     const run = {

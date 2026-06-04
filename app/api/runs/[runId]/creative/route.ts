@@ -8,10 +8,15 @@ import {
 } from "../../../../../src/config/channels";
 import { callCreativePromptAgent } from "../../../../../src/generators/creative-prompt-agent";
 import { buildPrompt } from "../../../../../src/generators/prompt-builder";
+import {
+  markCreativeAngleApproved,
+  saveCreativeAnglesForRun
+} from "../../../../../src/lib/creative-angles";
 import { parseCreativeConcepts } from "../../../../../src/lib/creative-concepts";
 import { selectedAdElementsText } from "../../../../../src/lib/creative-elements";
 import {
   readRun,
+  updateRunCreativeAngle,
   updateRunCreativeWorkspace,
   type ModelSelectionState,
   type RunState
@@ -103,11 +108,25 @@ export async function POST(request: Request, { params }: RouteContext) {
         return NextResponse.json({ error: "Creative concept not found." }, { status: 404 });
       }
 
+      const [angle] = await saveAnglesIfPossible(runWithWorkspace, [concept]);
+
+      if (angle) {
+        await markCreativeAngleApproved({
+          projectId: angle.projectId,
+          destinationSlug: angle.destinationSlug,
+          angleId: angle.angleId
+        });
+        await updateRunCreativeAngle(params.runId, angle);
+      }
+
       const generatedPrompts = await generateApprovedPrompts(runWithWorkspace, concept);
       const updated = await updateRunCreativeWorkspace(params.runId, {
         ...workspace,
         status: "prompts_ready",
         approvedConceptId: concept.id,
+        savedCreativeAngleIds: angle
+          ? Array.from(new Set([...(workspace.savedCreativeAngleIds ?? []), angle.angleId]))
+          : workspace.savedCreativeAngleIds,
         generatedPrompts,
         messages: [
           ...workspace.messages,
@@ -131,11 +150,24 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     if (action === "concepts") {
       const concepts = parseCreativeConcepts(actionText);
+      const angleRecords = await saveAnglesIfPossible(
+        {
+          ...runWithWorkspace,
+          creativeWorkspace: {
+            ...workspace,
+            concepts
+          }
+        },
+        concepts
+      );
       const updated = await updateRunCreativeWorkspace(params.runId, {
         ...workspace,
         status: "concepts_ready",
         messages: [...nextMessages, assistantMessage(actionText)],
-        concepts
+        concepts,
+        savedCreativeAngleIds: angleRecords.length
+          ? angleRecords.map((angle) => angle.angleId)
+          : workspace.savedCreativeAngleIds
       });
 
       return NextResponse.json({ workspace: updated.creativeWorkspace });
@@ -154,6 +186,14 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+async function saveAnglesIfPossible(run: RunState, concepts: readonly CreativeConcept[]) {
+  if (!run.projectId || !run.destinationSlug || concepts.length === 0) {
+    return [];
+  }
+
+  return saveCreativeAnglesForRun(run, concepts);
 }
 
 function emptyWorkspace(): CreativeWorkspace {

@@ -281,9 +281,19 @@ export function CreativeDirectionChat({
           <h2 className="text-base font-semibold">Creative angles</h2>
           {workspace.concepts?.length ? (
             <div className="mt-3 space-y-3">
-              {workspace.concepts.map((concept) => (
+              {workspace.concepts.map((concept, index) => {
+                const savedAngleId = workspace.savedCreativeAngleIds?.[index];
+
+                return (
                 <article key={concept.id} className="rounded-md border p-3">
-                  <h3 className="text-sm font-semibold">{concept.title}</h3>
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <h3 className="text-sm font-semibold">{concept.title}</h3>
+                    {savedAngleId ? (
+                      <span className="rounded-sm border border-green-700/20 bg-green-50 px-2 py-1 text-xs font-medium text-green-800">
+                        Saved for later
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     {concept.description}
                   </p>
@@ -311,7 +321,8 @@ export function CreativeDirectionChat({
                     {workspace.approvedConceptId === concept.id ? "Approved" : "Approve angle"}
                   </Button>
                 </article>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="mt-3 text-sm leading-6 text-muted-foreground">

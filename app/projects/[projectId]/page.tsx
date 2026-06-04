@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { CreativeAngleLibrary } from "../../../components/CreativeAngleLibrary";
 import { UrlScrapeForm } from "../../../components/UrlScrapeForm";
+import { listCreativeAngles } from "../../../src/lib/creative-angles";
 import { readProject } from "../../../src/lib/projects";
 
 type ProjectPageProps = {
@@ -16,10 +18,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     return <PageMessage title="Project not found" message="Create or select a project to continue." />;
   }
 
+  const angles = await listCreativeAngles({ projectId: project.projectId });
+  const angleGroups = groupAnglesByDestination(angles);
+
   return (
     <main className="min-h-screen bg-background">
-      <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-6 py-16">
-        <div className="max-w-2xl space-y-8">
+      <section className="mx-auto w-full max-w-6xl px-6 py-12">
+        <div className="space-y-8">
           <div className="space-y-3">
             <Link
               className="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -44,11 +49,56 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               Mass edit images
             </Link>
           </div>
-          <UrlScrapeForm projectId={project.projectId} />
+          <div className="grid gap-8 lg:grid-cols-[minmax(340px,0.8fr)_minmax(0,1.2fr)]">
+            <div className="space-y-4 rounded-md border bg-background p-5">
+              <h2 className="text-xl font-semibold">New destination run</h2>
+              <UrlScrapeForm projectId={project.projectId} />
+            </div>
+            <CreativeAngleLibrary
+              projectId={project.projectId}
+              angleGroups={angleGroups}
+            />
+          </div>
         </div>
       </section>
     </main>
   );
+}
+
+function groupAnglesByDestination(angles: Awaited<ReturnType<typeof listCreativeAngles>>) {
+  const groups = new Map<
+    string,
+    {
+      destinationSlug: string;
+      destinationName: string;
+      angles: typeof angles;
+    }
+  >();
+
+  for (const angle of angles) {
+    const existing = groups.get(angle.destinationSlug);
+
+    if (existing) {
+      existing.angles.push(angle);
+      continue;
+    }
+
+    groups.set(angle.destinationSlug, {
+      destinationSlug: angle.destinationSlug,
+      destinationName: angle.destinationName ?? titleCase(angle.destinationSlug),
+      angles: [angle]
+    });
+  }
+
+  return [...groups.values()];
+}
+
+function titleCase(value: string) {
+  return value
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function PageMessage({ title, message }: { title: string; message: string }) {
