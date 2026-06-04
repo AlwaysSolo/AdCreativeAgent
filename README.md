@@ -72,7 +72,7 @@ Start the local app:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), create or select a project, then paste the landing page URL on that project's Step 1 page. By default the app binds to localhost only.
+Open [http://localhost:3000](http://localhost:3000), create or select a project, then start Step 1 from either a live landing page URL or an uploaded project request document. By default the app binds to localhost only.
 
 ## Environment Variables
 
@@ -115,6 +115,8 @@ Dry Run is enabled by default for Mass Edit because large batches can spend quic
 ## Brief Defaults
 
 Step 2 pre-fills a short campaign name such as `July 4th`, `Memorial Day`, or `Epic Universe` when the landing page contains a recognizable promo theme. Brand colors always use the fixed Westgate palette: Navy Blue `#0e2545`, Gold `#c4a55d`, Orange `#d95d31`, Bright Blue `#3892dc`, and Westgate Blue `#148dd0`.
+
+When a landing page is not available yet, Step 1 also accepts a `.docx` project request form. The document is analyzed server-side and turned into the same editable Step 2 brief fields: campaign name, headline, offer, dates, location, target audience, tone, visual requirements, and avoidance notes. Embedded mood-board images are counted and used as context in the extracted visual notes, but the uploaded document is not stored as a permanent asset.
 
 ## Creative Direction
 

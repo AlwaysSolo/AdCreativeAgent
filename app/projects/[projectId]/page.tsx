@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CreativeAngleLibrary } from "../../../components/CreativeAngleLibrary";
+import { ProjectDocumentUploadForm } from "../../../components/ProjectDocumentUploadForm";
 import { UrlScrapeForm } from "../../../components/UrlScrapeForm";
 import { listCreativeAngles } from "../../../src/lib/creative-angles";
 import { readProject } from "../../../src/lib/projects";
@@ -49,10 +50,29 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               Mass edit images
             </Link>
           </div>
-          <div className="grid gap-8 lg:grid-cols-[minmax(340px,0.8fr)_minmax(0,1.2fr)]">
+          <div className="grid gap-8 lg:grid-cols-[minmax(420px,0.9fr)_minmax(0,1.1fr)]">
             <div className="space-y-4 rounded-md border bg-background p-5">
               <h2 className="text-xl font-semibold">New destination run</h2>
-              <UrlScrapeForm projectId={project.projectId} />
+              <div className="grid gap-5 xl:grid-cols-2">
+                <section className="space-y-3 rounded-md border bg-muted/20 p-4">
+                  <div>
+                    <h3 className="text-sm font-semibold">Landing page</h3>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      Use this when the offer page is already live.
+                    </p>
+                  </div>
+                  <UrlScrapeForm projectId={project.projectId} />
+                </section>
+                <section className="space-y-3 rounded-md border bg-muted/20 p-4">
+                  <div>
+                    <h3 className="text-sm font-semibold">Project document</h3>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      Use this when the campaign request arrives before the landing page.
+                    </p>
+                  </div>
+                  <ProjectDocumentUploadForm projectId={project.projectId} />
+                </section>
+              </div>
             </div>
             <CreativeAngleLibrary
               projectId={project.projectId}

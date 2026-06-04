@@ -28,10 +28,13 @@ import type { ProjectReference } from "./projects";
 
 export type RunState = {
   runId: string;
+  sourceType?: "landing_page" | "project_document";
   projectId?: string;
   projectName?: string;
   projectSlug?: string;
   landingPageUrl?: string;
+  sourceDocumentName?: string;
+  sourceDocumentMediaCount?: number;
   destinationName?: string;
   destinationSlug?: string;
   creativeAngleId?: string;
@@ -57,6 +60,9 @@ type RunStoreOptions = {
   now?: () => Date;
   project?: ProjectReference;
   sourceUrl?: string;
+  sourceType?: "landing_page" | "project_document";
+  sourceDocumentName?: string;
+  sourceDocumentMediaCount?: number;
 };
 
 export type ModelSelectionState = {
@@ -94,10 +100,13 @@ export async function createRun(
   const destination = inferDestination(scrapedBrief, options.sourceUrl);
   const run: RunState = {
     runId: generateUlid(now),
+    sourceType: options.sourceType ?? (options.sourceUrl ? "landing_page" : undefined),
     projectId: options.project?.projectId,
     projectName: options.project?.name,
     projectSlug: options.project?.slug,
     landingPageUrl: options.sourceUrl,
+    sourceDocumentName: options.sourceDocumentName,
+    sourceDocumentMediaCount: options.sourceDocumentMediaCount,
     destinationName: destination?.destinationName,
     destinationSlug: destination?.destinationSlug,
     createdAt: now.toISOString(),
