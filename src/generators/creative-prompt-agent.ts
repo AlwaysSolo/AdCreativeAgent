@@ -136,6 +136,10 @@ export async function callCreativePromptAgent(
     throw new Error("OpenAI prompt agent returned no output text.");
   }
 
+  if ((context.mode ?? "prompt") === "prompt" && isFollowUpBlock(text)) {
+    throw new Error("OpenAI prompt agent returned a follow-up block during final prompt mode.");
+  }
+
   return {
     text,
     model: request.model
@@ -215,8 +219,10 @@ function modeInstruction(mode: CreativePromptAgentMode) {
 
   return [
     "Write the final image-generation prompt using the mandatory section structure.",
-    "If critical discovery details or reference imagery are missing, start with FOLLOW_UP: and ask concise questions instead of writing a final prompt.",
-    "Return only the user-ready prompt or the FOLLOW_UP block."
+    "Do not ask follow-up questions in this mode. Do not return FOLLOW_UP.",
+    "If no reference image is attached, continue anyway using the available scrape, project document, approved ad elements, destination, campaign context, and approved creative concept.",
+    "When exact property architecture is unknown, describe a believable destination-appropriate resort setting without claiming reference-image fidelity.",
+    "Return only the user-ready prompt."
   ].join(" ");
 }
 
@@ -249,6 +255,10 @@ function outputTextFromResponse(payload: unknown) {
     )
     .join("\n")
     .trim();
+}
+
+function isFollowUpBlock(text: string) {
+  return /^\s*FOLLOW[_ -]?UP\s*:/i.test(text);
 }
 
 function uniqueUrls(urls: readonly (string | undefined)[]) {

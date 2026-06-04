@@ -129,7 +129,7 @@ function directResponseTravelAdPrompt(brief: CreativeBrief, size: ChannelSize) {
 
   return [
     `Design a ${formatCreativeFormat(size)} direct-response travel ad promoting ${indefiniteArticle(destination)} ${destination} ${theme} family getaway.`,
-    "Use the reference image as needed to create a unique view that is attractive and attention grabbing.",
+    "Create a unique, attractive, attention-grabbing destination view using the campaign and location context available.",
     "The ad creative should feel fun, family-friendly, active, and vacation-ready, but the final piece must be structured like a promotional offer ad with layered text blocks and strong price hierarchy.",
     "Match the visual language of bold direct-response travel ads: huge central price, and simple bright color contrast.",
     `Make sure the whole creative is ${theme} theme.`,

@@ -135,4 +135,40 @@ describe("creative prompt agent", () => {
       })
     );
   });
+
+  it("rejects follow-up blocks in final prompt mode so Review never receives questions", async () => {
+    const fetchSpy = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          output_text:
+            "FOLLOW_UP:\n- No reference image is attached. Please provide one before I write the prompt."
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" }
+        }
+      )
+    );
+
+    await expect(
+      callCreativePromptAgent(
+        {
+          brief,
+          channel: "meta",
+          size: channels.meta.sizes[0],
+          modelId: "openai/gpt-image-2",
+          basePrompt: "Fallback Meta prompt",
+          negativePrompt: "no brand marks",
+          referenceImageUrls: [],
+          mode: "prompt"
+        },
+        {
+          apiKey: "test-key",
+          model: "gpt-test-model",
+          instructionsPath,
+          fetch: fetchSpy
+        }
+      )
+    ).rejects.toThrow("follow-up block");
+  });
 });

@@ -191,6 +191,7 @@ describe("buildPrompt", () => {
     expect(result.prompt).toContain('Main headline: "Spring Family Getaway"');
     expect(result.prompt).toContain("central 60% horizontal band");
     expect(result.prompt).toContain("avoid the outer left and right thirds");
+    expect(result.prompt).not.toContain("Use the reference image");
     expect(result.prompt).not.toContain("Creative direction:");
     expect(result.prompt).not.toContain("Brand guidelines:");
     expect(result.prompt).not.toContain("Style modifiers");
